@@ -1,5 +1,7 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
+
 
 import LoginPage from "./auth/LoginPage";
 import SignupPage from "./auth/SignupPage";
@@ -32,7 +34,7 @@ const RedirectIfAuth: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         {/* Auth Pages */}
         <Route
@@ -65,7 +67,7 @@ const App: React.FC = () => {
         {/* Default fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
 
