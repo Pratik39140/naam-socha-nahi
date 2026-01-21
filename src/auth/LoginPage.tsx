@@ -10,11 +10,20 @@ const LoginPage = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ paddingY: 4 }}>
-      <Stack spacing={2}>
+    <Container 
+      maxWidth="sm" 
+      sx={{ 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        paddingY: 4 
+      }}
+    >
+      <Stack spacing={3} sx={{ width: '100%', textAlign: 'center' }}>
         <Typography variant="h5">Auth Placeholder – Login Page</Typography>
 
-        <Button variant="contained" onClick={handleLogin}>
+        <Button variant="contained" onClick={handleLogin} size="large">
           Login
         </Button>
       </Stack>
