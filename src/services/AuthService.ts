@@ -1,10 +1,10 @@
 // src/services/AuthService.ts
 
-export async function login(credentials: any): Promise<void> {
+export async function login(): Promise<void> {
   // TODO: implement login API call
 }
 
-export async function signup(data: any): Promise<void> {
+export async function signup(): Promise<void> {
   // TODO: implement signup API call
 }
 
