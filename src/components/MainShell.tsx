@@ -6,6 +6,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import QueueIcon from "@mui/icons-material/Queue";
 import PaymentIcon from "@mui/icons-material/Payment";
 import PersonIcon from "@mui/icons-material/Person";
+import { Box } from "@mui/material";
 
 const MainShell: React.FC = () => {
   const navigate = useNavigate();
@@ -23,15 +24,46 @@ const MainShell: React.FC = () => {
     "/main/upload";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <div style={{ flex: 1, overflow: "auto" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        width: "100vw",
+        overflow: "hidden",
+        position: "relative",
+      }}
+    >
+      {/* Content Area */}
+      <Box
+        sx={{
+          flex: 1,
+          overflow: "auto",
+          pb: "56px", // Height of bottom navigation
+          WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
+        }}
+      >
         <Outlet />
-      </div>
+      </Box>
 
+      {/* Bottom Navigation - Fixed */}
       <BottomNavigation
         value={current}
         onChange={(_, newValue) => navigate(newValue)}
         showLabels
+        sx={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: "100%",
+          borderTop: "1px solid",
+          borderColor: "divider",
+          boxShadow: "0 -2px 8px rgba(0,0,0,0.1)",
+          zIndex: 1000,
+          // Safe area for devices with notches/home indicators
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
       >
         {tabs.map((tab) => (
           <BottomNavigationAction
@@ -39,10 +71,17 @@ const MainShell: React.FC = () => {
             label={tab.label}
             value={tab.value}
             icon={tab.icon}
+            sx={{
+              minWidth: "60px",
+              padding: "6px 12px",
+              "& .MuiBottomNavigationAction-label": {
+                fontSize: "0.75rem",
+              },
+            }}
           />
         ))}
       </BottomNavigation>
-    </div>
+    </Box>
   );
 };
 
