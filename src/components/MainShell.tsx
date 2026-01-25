@@ -23,6 +23,8 @@ const MainShell: React.FC = () => {
     tabs.find((t) => location.pathname.startsWith(t.value))?.value ??
     "/main/upload";
 
+  const handleLogout = () => { localStorage.removeItem("logged_in"); navigate("/login"); };
+
   return (
     <Box
       sx={{

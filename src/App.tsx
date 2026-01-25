@@ -11,6 +11,8 @@ import PaymentPage from "./payment/PaymentPage";
 import ProfilePage from "./profile/ProfilePage";
 import MainShell from "./components/MainShell";
 
+
+
 const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const loggedIn = !!localStorage.getItem("logged_in");
   const location = useLocation();
