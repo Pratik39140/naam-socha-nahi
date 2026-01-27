@@ -39,12 +39,27 @@ const SignupPage: React.FC = () => {
   };
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-      <Card sx={{ width: 400, p: 2 }}>
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      sx={{ px: 2 }}
+    >
+      <Card
+        sx={{
+          width: "100%",
+          maxWidth: 400,
+          p: 2,
+          boxShadow: 3,
+          borderRadius: 2,
+        }}
+      >
         <CardContent>
           <Typography variant="h5" gutterBottom>
             Sign Up
           </Typography>
+
           <TextField
             fullWidth
             label="Username"
@@ -52,6 +67,7 @@ const SignupPage: React.FC = () => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
+
           <TextField
             fullWidth
             label="Email"
@@ -60,6 +76,7 @@ const SignupPage: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+
           <TextField
             fullWidth
             label="Password"
@@ -70,25 +87,29 @@ const SignupPage: React.FC = () => {
             helperText={error}
             onChange={(e) => setPassword(e.target.value)}
           />
+
           <Button
             fullWidth
             variant="contained"
-            color="primary"
             sx={{ mt: 2 }}
             onClick={handleSubmit}
           >
             Sign Up
           </Button>
+
           <Box mt={2}>
-            <Link component={RouterLink} to="/login" underline="hover"> Already have an account? Login </Link>
+            <Link component={RouterLink} to="/login" underline="hover">
+              Already have an account? Login
+            </Link>
           </Box>
         </CardContent>
       </Card>
 
-      <Snackbar open={success} autoHideDuration={2000} onClose={() => setSuccess(false)}>
-        <Alert severity="success">Signup successful! Redirecting to login...</Alert>
+      <Snackbar open={success} autoHideDuration={2000}>
+        <Alert severity="success">Signup successful! Redirecting...</Alert>
       </Snackbar>
     </Box>
+
   );
 };
 

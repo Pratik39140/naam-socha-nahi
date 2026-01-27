@@ -40,8 +40,22 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-      <Card sx={{ width: 400, p: 2 }}>
+    <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="100vh"
+          sx={{ px: 2 }}
+        >
+      <Card
+              sx={{
+                width: "100%",
+                maxWidth: 400,
+                p: 2,
+                boxShadow: 3,
+                borderRadius: 2,
+              }}
+            >
         <CardContent>
           <Typography variant="h5" gutterBottom>
             Login
