@@ -35,7 +35,7 @@ const UploadPage: React.FC = () => {
     const jwt = localStorage.getItem("jwt"); // or however you store it
 
     try {
-      const res = await fetch("http://10.1.239.86:3000/upload", {
+      const res = await fetch("http://10.92.74.104:3000/upload", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${jwt}`,

@@ -49,5 +49,5 @@ app.get("/files", (req, res) => {
 const PORT = 3000;
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Backend running on http://10.1.239.86:${PORT}`);
+  console.log(`Backend running on http://10.92.74.104:${PORT}`);
 });
