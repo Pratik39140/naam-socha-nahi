@@ -24,17 +24,32 @@ const UploadPage: React.FC = () => {
     setFileName(selected ? selected.name : "");
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!file || !pageRanges.trim()) return;
 
-    console.log({
-      file,
-      fileName,
-      pageRanges,
-      colorMode,
-      createdAt: Date.now(),
-    });
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("pageRanges", pageRanges);
+    formData.append("colorMode", colorMode);
+
+    const jwt = localStorage.getItem("jwt"); // or however you store it
+
+    try {
+      const res = await fetch("http://localhost:3000/upload", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+      console.log("Upload response:", data);
+    } catch (err) {
+      console.error("Upload failed:", err);
+    }
   };
+
 
   const disabled = !file || !pageRanges.trim();
 
