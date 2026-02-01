@@ -10,6 +10,8 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 
 const UploadPage: React.FC = () => {
@@ -17,6 +19,11 @@ const UploadPage: React.FC = () => {
   const [fileName, setFileName] = useState("");
   const [pageRanges, setPageRanges] = useState("");
   const [colorMode, setColorMode] = useState<"bw" | "color">("bw");
+
+  // NEW STATE
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState<boolean | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] || null;
@@ -27,12 +34,16 @@ const UploadPage: React.FC = () => {
   const handleUpload = async () => {
     if (!file || !pageRanges.trim()) return;
 
+    setIsUploading(true);
+    setUploadSuccess(null);
+    setErrorMessage(null);
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("pageRanges", pageRanges);
     formData.append("colorMode", colorMode);
 
-    const jwt = localStorage.getItem("jwt"); // or however you store it
+    const jwt = localStorage.getItem("jwt");
 
     try {
       const res = await fetch("http://10.92.74.104:3000/upload", {
@@ -44,14 +55,22 @@ const UploadPage: React.FC = () => {
       });
 
       const data = await res.json();
-      console.log("Upload response:", data);
-    } catch (err) {
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Upload failed");
+      }
+
+      setUploadSuccess(true);
+    } catch (err: any) {
       console.error("Upload failed:", err);
+      setUploadSuccess(false);
+      setErrorMessage(err.message || "Something went wrong during upload");
+    } finally {
+      setIsUploading(false);
     }
   };
 
-
-  const disabled = !file || !pageRanges.trim();
+  const disabled = !file || !pageRanges.trim() || isUploading;
 
   return (
     <Box
@@ -75,7 +94,20 @@ const UploadPage: React.FC = () => {
             Upload Document
           </Typography>
 
-          <Button variant="contained" component="label" fullWidth>
+          {/* SUCCESS / ERROR FEEDBACK */}
+          {uploadSuccess === true && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              Upload successful. Proceed to payment.
+            </Alert>
+          )}
+
+          {uploadSuccess === false && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {errorMessage || "Upload failed"}
+            </Alert>
+          )}
+
+          <Button variant="contained" component="label" fullWidth disabled={isUploading}>
             Choose File
             <input
               type="file"
@@ -86,10 +118,7 @@ const UploadPage: React.FC = () => {
           </Button>
 
           {fileName && (
-            <Typography
-              variant="body2"
-              sx={{ mt: 1, color: "text.secondary" }}
-            >
+            <Typography variant="body2" sx={{ mt: 1, color: "text.secondary" }}>
               Selected: {fileName}
             </Typography>
           )}
@@ -102,9 +131,10 @@ const UploadPage: React.FC = () => {
             value={pageRanges}
             onChange={(e) => setPageRanges(e.target.value)}
             required
+            disabled={isUploading}
           />
 
-          <FormControl fullWidth sx={{ mt: 2 }}>
+          <FormControl fullWidth sx={{ mt: 2 }} disabled={isUploading}>
             <InputLabel>Color Mode</InputLabel>
             <Select
               value={colorMode}
@@ -123,7 +153,14 @@ const UploadPage: React.FC = () => {
             disabled={disabled}
             onClick={handleUpload}
           >
-            Upload
+            {isUploading ? (
+              <>
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+                Uploading...
+              </>
+            ) : (
+              "Upload"
+            )}
           </Button>
         </CardContent>
       </Card>
