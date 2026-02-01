@@ -26,6 +26,8 @@ function parsePageRanges(input) {
     });
 }
 
+const QUEUE_FILE = "./data/queue.json";
+
 router.post("/upload", upload.single("file"), (req, res) => {
   try {
     // extract jwt (optional for now)
@@ -53,6 +55,32 @@ router.post("/upload", upload.single("file"), (req, res) => {
 
     fs.mkdirSync(finalFolder, { recursive: true });
     fs.renameSync(file.path, finalPath);
+
+    // 🔽 🔽 🔽 MINIMAL QUEUE ADDITION 🔽 🔽 🔽
+    let queue = [];
+    // console.log("UPLOAD QUEUE_FILE:", path.resolve(QUEUE_FILE));
+    if (fs.existsSync(QUEUE_FILE)) {
+      const raw = fs.readFileSync(QUEUE_FILE, "utf-8").trim();
+      if (raw) queue = JSON.parse(raw);
+    }
+
+    const exists = queue.some(job => job.jobId === jobId);
+
+    if (!exists) {
+      queue.push({
+        jobId,
+        userId,
+        filePath: finalPath,
+        fileName: jobId + ext,
+        pageRanges,
+        colorMode,
+        status: "pending-payment",
+        createdAt: Date.now()
+      });
+
+      fs.writeFileSync(QUEUE_FILE, JSON.stringify(queue, null, 2));
+    }
+    // 🔼 🔼 🔼 END QUEUE ADDITION 🔼 🔼 🔼
 
     return res.json({
       jobId,

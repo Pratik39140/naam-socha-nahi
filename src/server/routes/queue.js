@@ -1,34 +1,43 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import express from 'express';
+import express from "express";
+import fs from "fs";
+import path from "path";
+import jwt from "jsonwebtoken";
+import { fileURLToPath } from "url";
 
 const router = express.Router();
 
+// __dirname replacement for ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const queueFile = path.join(__dirname, '..', 'queue.json');
+const QUEUE_FILE = path.join(__dirname, "../../../data/queue.json");
 
+// const JWT_SECRET = process.env.JWT_SECRET;
+// const DEMO_MODE = process.env.DEMO_MODE === "true";
 
-router.get('/queue', (req, res) => {
-  let data;
+// GET /queue/user
+// GET /queue/user
+router.get("/queue/user", (req, res) => {
   try {
-    const raw = fs.readFileSync(queueFile, 'utf8');
-    data = JSON.parse(raw);
+    let jobs = [];
+    // console.log("QUEUE USER QUEUE_FILE:", path.resolve(QUEUE_FILE));
+    if (fs.existsSync(QUEUE_FILE)) {
+      const raw = fs.readFileSync(QUEUE_FILE, "utf-8").trim();
+      if (raw) {
+        jobs = JSON.parse(raw);
+      }
+    }
+
+    // 🔧 AUTH DISABLED: return all jobs for now
+    jobs.sort((a, b) => a.createdAt - b.createdAt);
+
+    return res.json(jobs);
   } catch (err) {
-    console.error('Failed to load queue file:', err);
-    return res.status(500).json({ error: 'Queue storage error' });
+    console.error("GET /queue/user error:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
-
-  // Optionally sort by queue position for readability
-  const jobs = [...data.jobs].sort((a, b) => {
-    const ap = a.queuePosition ?? Infinity;
-    const bp = b.queuePosition ?? Infinity;
-    return ap - bp;
-  });
-
-  res.json({ jobs });
 });
+
+
 
 export default router;
