@@ -1,34 +1,22 @@
-export interface PaymentResult {
-  jobId: string;
-  status: string;
-  queuePosition: number;
-  fileName?: string;
-  colorMode?: string;
-}
+class PaymentService {
+  static async pay(jobId: string) {
+    const userId = localStorage.getItem("userId");
 
-export const PaymentService = {
-  pay: async (jobId: string): Promise<PaymentResult> => {
-    const res = await fetch('/payment', {
-      method: 'POST',
+    const response = await fetch("/payment/user", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ jobId })
+      body: JSON.stringify({ jobId, userId }),
     });
 
-    if (!res.ok) {
-      const msg = await res.text();
-      throw new Error(`Payment failed: ${msg}`);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Payment failed");
     }
 
-    const job = await res.json();
-
-    return {
-      jobId: job.id || job.jobId,
-      status: job.status,
-      queuePosition: job.queuePosition,
-      fileName: job.fileName,
-      colorMode: job.colorMode
-    };
+    return response.json();
   }
-};
+}
+
+export default PaymentService;

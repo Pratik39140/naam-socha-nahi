@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import fs from "fs";
 import path from "path";
 
+
 const router = Router();
 
 // temp folder for multer before renaming
@@ -28,7 +29,7 @@ function parsePageRanges(input) {
 
 const QUEUE_FILE = "./data/queue.json";
 
-router.post("/upload", upload.single("file"), (req, res) => {
+router.post("/api/upload", upload.single("file"), (req, res) => {
   try {
     // extract jwt (optional for now)
     const token = req.headers.authorization?.replace("Bearer ", "");

@@ -15,7 +15,7 @@ const MainShell: React.FC = () => {
   const tabs = [
     { label: "Upload", value: "/main/upload", icon: <CloudUploadIcon /> },
     { label: "Queue", value: "/main/queue", icon: <QueueIcon /> },
-    { label: "Payment", value: "/main/payment", icon: <PaymentIcon /> },
+    { label: "History", value: "/main/history", icon: <PaymentIcon /> },
     { label: "Profile", value: "/main/profile", icon: <PersonIcon /> },
   ];
 

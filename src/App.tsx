@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { HashRouter } from "react-router-dom";
 
-
+import HistoryPage from "./history/HistoryPage";
 import LoginPage from "./auth/LoginPage";
 import SignupPage from "./auth/SignupPage";
 import UploadPage from "./upload/UploadPage";
@@ -62,7 +62,8 @@ const App: React.FC = () => {
 
           <Route path="upload" element={<UploadPage />} />
           <Route path="queue" element={<QueuePage />} />
-          <Route path="payment" element={<PaymentPage />} />
+          <Route path="payment/:jobId" element={<PaymentPage />} />
+          <Route path="history" element={<HistoryPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 

@@ -17,7 +17,7 @@ const QUEUE_FILE = path.join(__dirname, "../../../data/queue.json");
 
 // GET /queue/user
 // GET /queue/user
-router.get("/queue/user", (req, res) => {
+router.get("/api/queue/user", (req, res) => {
   try {
     let jobs = [];
     // console.log("QUEUE USER QUEUE_FILE:", path.resolve(QUEUE_FILE));

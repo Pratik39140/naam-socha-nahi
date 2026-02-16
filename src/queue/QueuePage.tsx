@@ -16,6 +16,7 @@ type QueueJob = {
   colorMode: string;
   status: "pending-payment" | "queued" | "printing" | "done";
   createdAt: number;
+  queuePosition?: number; // ✅ added
 };
 
 const QueuePage: React.FC = () => {
@@ -26,33 +27,41 @@ const QueuePage: React.FC = () => {
   const navigate = useNavigate();
 
   const fetchJobs = async (): Promise<void> => {
-  setLoading(true);
-  setError(null);
+    setLoading(true);
+    setError(null);
 
-  try {
-    const res = await fetch("http://10.92.74.104:3000/queue/user");
+    try {
+      const res = await fetch(`/api/queue/user`);
 
-    if (!res.ok) {
-      throw new Error("Failed to fetch queue");
+      if (!res.ok) {
+        throw new Error("Failed to fetch queue");
+      }
+
+      const data: QueueJob[] = await res.json();
+
+      // ✅ Sort queued jobs by queuePosition (FIFO order)
+      const sorted = [...data].sort((a, b) => {
+        if (a.status === "queued" && b.status === "queued") {
+          return (a.queuePosition ?? 0) - (b.queuePosition ?? 0);
+        }
+        return 0;
+      });
+
+      setJobs(sorted);
+    } catch (err) {
+      console.error(err);
+      setError("Could not load queue");
+    } finally {
+      setLoading(false);
     }
-
-    const data: QueueJob[] = await res.json();
-    setJobs(data);
-  } catch (err) {
-    console.error(err);
-    setError("Could not load queue");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   useEffect(() => {
     fetchJobs();
   }, []);
 
   const formatDate = (timestamp: number): string =>
-    new Date(timestamp * 1000).toLocaleString();
+    new Date(timestamp).toLocaleString(); // removed *1000 (your createdAt is already ms)
 
   return (
     <Container maxWidth="sm" sx={{ paddingY: 4 }}>
@@ -111,7 +120,7 @@ const QueuePage: React.FC = () => {
                   <Button
                     variant="contained"
                     sx={{ marginTop: 1 }}
-                    onClick={() => navigate(`/payment/${job.jobId}`)}
+                    onClick={() => navigate(`/main/payment/${job.jobId}`)}
                   >
                     Pay
                   </Button>
@@ -119,7 +128,7 @@ const QueuePage: React.FC = () => {
 
                 {job.status === "queued" && (
                   <Typography variant="body2" color="text.secondary">
-                    Queue position: —
+                    Queue position: {job.queuePosition ?? "—"}
                   </Typography>
                 )}
               </Stack>

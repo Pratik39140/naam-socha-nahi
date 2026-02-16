@@ -1,83 +1,163 @@
-import React, { useState } from "react";
-import { Container, Stack, Typography, Button, Paper, Divider } from "@mui/material";
-import { PaymentService } from "../services/PaymentService";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  CircularProgress,
+  Alert
+} from "@mui/material";
+import { useParams, useNavigate } from "react-router-dom";
 
-interface JobDetails {
+interface Job {
   jobId: string;
-  fileName: string;
-  pages: number;
-  colorMode: string;
-  price: number;
+  originalFileName: string;
+  pageRanges: number[];
+  colorMode: "bw" | "color";
+  status: "pending-payment" | "queued" | "printing" | "done";
+  createdAt: number;
 }
 
 const PaymentPage: React.FC = () => {
+  const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  // Expecting job info passed via navigate("/payment", { state: job })
-  const job = location.state as JobDetails | undefined;
+  const [job, setJob] = useState<Job | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [paying, setPaying] = useState<boolean>(false);
 
-  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        setLoading(true);
 
-  if (!job) {
-    return (
-      <Container maxWidth="sm" sx={{ py: 4 }}>
-        <Typography>No job selected for payment.</Typography>
-      </Container>
-    );
-  }
+        const res = await fetch("/api/queue/user");
+        if (!res.ok) {
+          throw new Error("Failed to fetch jobs");
+        }
 
-  const handlePayNow = async () => {
+        const data: Job[] = await res.json();
+
+        const foundJob = data.find((j) => j.jobId === jobId);
+
+        if (!foundJob) {
+          setError("Job not found");
+        } else {
+          setJob(foundJob);
+        }
+      } catch (err: any) {
+        setError(err.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, [jobId]);
+
+  const calculatePrice = (): number => {
+    if (!job) return 0;
+
+    const pages = job.pageRanges.length;
+    const pricePerPage = job.colorMode === "bw" ? 2 : 7;
+
+    return pages * pricePerPage;
+  };
+
+  const handlePayment = async () => {
+    if (!jobId) return;
+
     try {
-      setLoading(true);
+      setPaying(true);
+      setError(null);
 
-      // Mock of Razorpay here — skip actual integration
-      console.log("Mock Razorpay: payment initiated...");
-
-      await PaymentService.pay(job.jobId);
-
-      navigate("/queue", {
-        state: { message: "Payment successful. Job added to queue!" }
+      const res = await fetch("/api/payment/user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ jobId })
       });
 
-    } catch (err) {
-      console.error(err);
-      alert("Payment failed. Try again.");
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Payment failed");
+      }
+
+      // Backend now sets status to "queued"
+      // Go back to queue page
+      navigate("/main/queue");
+
+    } catch (err: any) {
+      setError(err.message || "Payment failed");
     } finally {
-      setLoading(false);
+      setPaying(false);
     }
   };
 
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" mt={5}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box mt={5} display="flex" justifyContent="center">
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
+  }
+
+  if (!job) return null;
+
   return (
-    <Container maxWidth="sm" sx={{ py: 4 }}>
-      <Stack spacing={2}>
-        <Typography variant="h5">Review & Pay</Typography>
+    <Box display="flex" justifyContent="center" mt={5}>
+      <Card sx={{ width: 420 }}>
+        <CardContent>
+          <Typography variant="h5" gutterBottom>
+            Payment Details
+          </Typography>
 
-        <Paper variant="outlined" sx={{ p: 2 }}>
-          <Stack spacing={1}>
-            <Typography><strong>File:</strong> {job.fileName}</Typography>
-            <Typography><strong>Pages:</strong> {job.pages}</Typography>
-            <Typography><strong>Color:</strong> {job.colorMode}</Typography>
-            <Typography><strong>Price:</strong> ₹{job.price}</Typography>
-          </Stack>
-        </Paper>
+          <Typography>
+            <strong>File:</strong> {job.originalFileName}
+          </Typography>
 
-        <Divider />
+          <Typography>
+            <strong>Pages:</strong> {job.pageRanges.length}
+          </Typography>
 
-        <Typography variant="body2" color="text.secondary">
-          Mock Razorpay UI — skipping real payment gateway
-        </Typography>
+          <Typography>
+            <strong>Color Mode:</strong>{" "}
+            {job.colorMode === "bw" ? "Black & White" : "Color"}
+          </Typography>
 
-        <Button
-          variant="contained"
-          onClick={handlePayNow}
-          disabled={loading}
-        >
-          {loading ? "Processing..." : "Pay Now"}
-        </Button>
-      </Stack>
-    </Container>
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            Total Price: ₹{calculatePrice()}
+          </Typography>
+
+          <Button
+            variant="contained"
+            fullWidth
+            sx={{ mt: 3 }}
+            onClick={handlePayment}
+            disabled={paying}
+          >
+            {paying ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              "Pay Now"
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 

@@ -8,57 +8,73 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const queueFile = path.join(__dirname, '..', 'queue.json');
+const queueFile = path.join(__dirname, '../../../data', 'queue.json');
 
-
-router.post('/payment', (req, res) => {
+router.post('/payment/user', (req, res) => {
   const { jobId } = req.body;
+
   if (!jobId) {
     return res.status(400).json({ error: 'jobId is required' });
   }
 
   // Load queue.json
-  let data;
+  let jobs;
   try {
     const raw = fs.readFileSync(queueFile, 'utf8');
-    data = JSON.parse(raw);
+    jobs = JSON.parse(raw);
   } catch (err) {
     console.error('Failed to load queue file:', err);
     return res.status(500).json({ error: 'Queue storage error' });
   }
 
+  if (!Array.isArray(jobs)) {
+    return res.status(500).json({ error: 'Invalid queue structure' });
+  }
+
   // Find job
-  const job = data.jobs.find(j => j.id === jobId);
+  const job = jobs.find(j => j.jobId === jobId);
+
   if (!job) {
     return res.status(404).json({ error: 'Job not found' });
   }
 
-  // Validate status
+  // Ensure correct status
   if (job.status !== 'pending-payment') {
-    return res.status(400).json({ error: `Job not in pending-payment state (current: ${job.status})` });
+    return res.status(400).json({
+      error: `Job not in pending-payment state (current: ${job.status})`
+    });
   }
 
-  // Mark as paid then queued
-  job.status = 'paid';
+  // Calculate price
+  const pages = job.pageRanges.length;
+  const pricePerPage = job.colorMode === 'bw' ? 2 : 7;
+  const calculatedPrice = pages * pricePerPage;
+
+  // FIFO Queue Position Logic
+  const queuedJobs = jobs.filter(
+    j => j.status === 'queued' && typeof j.queuePosition === 'number'
+  );
+
+  const nextPosition =
+    queuedJobs.length > 0
+      ? Math.max(...queuedJobs.map(j => j.queuePosition)) + 1
+      : 1;
+
+  // Update job
   job.status = 'queued';
-
-  // Assign queuePosition based on FIFO: position = count of queued jobs before it + 1
-  const queued = data.jobs.filter(j => j.status === 'queued' && j.queuePosition != null);
-  const nextPosition = queued.length > 0
-    ? Math.max(...queued.map(j => j.queuePosition)) + 1
-    : 1;
-
   job.queuePosition = nextPosition;
+  job.paidAt = Date.now();
+  job.price = calculatedPrice;
 
-  // Save
+  // Save updated queue
   try {
-    fs.writeFileSync(queueFile, JSON.stringify(data, null, 2));
+    fs.writeFileSync(queueFile, JSON.stringify(jobs, null, 2));
   } catch (err) {
     console.error('Failed to write queue file:', err);
     return res.status(500).json({ error: 'Queue save error' });
   }
 
-  res.json(job);
+  return res.json(job);
 });
 
 export default router;
