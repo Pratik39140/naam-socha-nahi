@@ -12,19 +12,17 @@ export const loginUser = async (
   password: string
 ): Promise<AuthResponse> => {
   try {
+    // Hash the password before sending
     const encryptedPassword = CryptoJS.SHA256(password).toString();
 
-    if (username === "admin" && encryptedPassword) {
-      const token = "mock-jwt-token-" + Date.now();
-      // store mock session (demo)
-      sessionStorage.setItem("token", token);
-      sessionStorage.setItem("userId", "admin");
+    const response = await fetch("http://localhost:5000/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password: encryptedPassword }),
+    });
 
-      return { success: true, token };
-    }
-
-    return { success: false, message: "Invalid username or password" };
-  } catch {
-    return { success: false, message: "Server error during authentication" };
+    return response.json();
+  } catch (error) {
+    return { success: false, message: "Network error during login" };
   }
 };

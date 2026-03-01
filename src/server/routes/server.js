@@ -3,11 +3,12 @@ import cors from "cors";
 import fs from "fs";
 import path from "path";
 import os from "os";
+import CryptoJS from "crypto-js";
 import { fileURLToPath } from "url";
 
-import uploadRoute from "./routes/upload.js";
-import paymentRoute from "./routes/payment.js";
-import queueRoute from "./routes/queue.js";
+import uploadRoute from "./upload.js";
+import paymentRoute from "./payment.js";
+import queueRoute from "./queue.js";
 
 const app = express();
 
@@ -16,7 +17,7 @@ const app = express();
 // =============================
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
+const usersFile = path.join(__dirname, "users.json");
 // =============================
 // middleware
 // =============================
@@ -46,6 +47,54 @@ app.get("/files", (req, res) => {
     return res.status(500).json({ error: "server error" });
   }
 });
+
+// Helper: read users
+ function readUsers() {
+ if (!fs.existsSync(usersFile))  return [];
+ const data = fs.readFileSync(usersFile);
+ return JSON.parse(data);
+ }
+
+ // Helper: write users
+ function writeUsers(users) {
+ fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
+ }
+
+// Signup endpoint
+ app.post("/signup", (req, res) => {
+ const { username, email, password } = req.body;
+ if (!username || !email || !password) {
+ return res.status(400).json({ success: false, message: "Missing fields" });
+  }
+
+   const users = readUsers();
+   if (users.find((u) => u.username === username)) {
+   return res.status(400).json({ success: false, message: "User already exists" });
+   }
+    const encryptedPassword = CryptoJS.SHA256(password).toString();
+    users.push({ username, email, password: encryptedPassword });
+    writeUsers(users);
+
+    res.json({ success: true, token: "mock-token-" + Date.now() }); });
+
+    // Login endpoint
+    app.post("/login", (req, res) => {
+    const { username, password } = req.body;
+    const encryptedPassword = CryptoJS.SHA256(password).toString();
+
+    const users = readUsers();
+    const user = users.find( (u) => u.username === username && u.password === encryptedPassword );
+
+    if (user) {
+    return res.json({ success: true, token: "mock-token-" + Date.now() });
+     }
+     else {
+     return res.status(401).json({ success: false, message: "Invalid credentials" });
+     }
+     });
+
+
+
 
 // =============================
 // SERVE FRONTEND BUILD
@@ -77,7 +126,7 @@ function getLocalIP() {
 // =============================
 // start server
 // =============================
-const PORT = 3000;
+const PORT = 5000;
 
 app.listen(PORT, "0.0.0.0", () => {
   const ip = getLocalIP();

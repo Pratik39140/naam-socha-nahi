@@ -13,14 +13,17 @@ export const registerUser = async (
   password: string
 ): Promise<AuthResponse> => {
   try {
+    // Hash the password before sending
     const encryptedPassword = CryptoJS.SHA256(password).toString();
 
-    if (username && email && encryptedPassword) {
-      return { success: true, token: "mock-registration-token-" + Date.now() };
-    }
+    const response = await fetch("http://localhost:5000/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password: encryptedPassword }),
+    });
 
-    return { success: false, message: "Invalid registration details" };
-  } catch {
-    return { success: false, message: "Server error during registration" };
+    return response.json();
+  } catch (error) {
+    return { success: false, message: "Network error during signup" };
   }
 };
