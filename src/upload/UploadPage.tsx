@@ -140,6 +140,13 @@ const UploadPage: React.FC = () => {
               value={colorMode}
               label="Color Mode"
               onChange={(e) => setColorMode(e.target.value as "bw" | "color")}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    backgroundColor: "Black",
+                    },
+                    },
+                    }}
             >
               <MenuItem value="bw">Black & White</MenuItem>
               <MenuItem value="color">Color</MenuItem>
