@@ -1,0 +1,84 @@
+{
+  "global": [
+    {
+      "jobId": "JOB_1775541601244",
+      "userId": "Navya",
+      "filePath": "data\\files\\JOB_1775541601244.docx",
+      "fileName": "JOB_1775541601244.docx",
+      "pageRanges": [
+        1
+      ],
+      "colorMode": "bw",
+      "status": "pending-payment",
+      "createdAt": 1775541601248
+    },
+    {
+      "jobId": "JOB_1775541968899",
+      "userId": "Trial",
+      "filePath": "data\\files\\JOB_1775541968899.docx",
+      "fileName": "JOB_1775541968899.docx",
+      "pageRanges": [
+        1
+      ],
+      "colorMode": "bw",
+      "status": "pending-payment",
+      "createdAt": 1775541968909
+    },
+    {
+      "jobId": "JOB_1775542235741",
+      "userId": "Trial",
+      "filePath": "data\\files\\JOB_1775542235741.pdf",
+      "fileName": "JOB_1775542235741.pdf",
+      "pageRanges": [
+        1,
+        2
+      ],
+      "colorMode": "color",
+      "status": "pending-payment",
+      "createdAt": 1775542235745
+    }
+  ],
+  "users": {
+    "Navya": [
+      {
+        "jobId": "JOB_1775541601244",
+        "userId": "Navya",
+        "filePath": "data\\files\\JOB_1775541601244.docx",
+        "fileName": "JOB_1775541601244.docx",
+        "pageRanges": [
+          1
+        ],
+        "colorMode": "bw",
+        "status": "pending-payment",
+        "createdAt": 1775541601248
+      }
+    ],
+    "Trial": [
+      {
+        "jobId": "JOB_1775541968899",
+        "userId": "Trial",
+        "filePath": "data\\files\\JOB_1775541968899.docx",
+        "fileName": "JOB_1775541968899.docx",
+        "pageRanges": [
+          1
+        ],
+        "colorMode": "bw",
+        "status": "pending-payment",
+        "createdAt": 1775541968909
+      },
+      {
+        "jobId": "JOB_1775542235741",
+        "userId": "Trial",
+        "filePath": "data\\files\\JOB_1775542235741.pdf",
+        "fileName": "JOB_1775542235741.pdf",
+        "pageRanges": [
+          1,
+          2
+        ],
+        "colorMode": "color",
+        "status": "pending-payment",
+        "createdAt": 1775542235745
+      }
+    ]
+  }
+}

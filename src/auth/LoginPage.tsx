@@ -31,8 +31,12 @@ const LoginPage: React.FC = () => {
     if (result.success) {
       setSuccess(true);
       setError("");
-      // Save login state so RequireAuth sees it
+      // Save login state and username to localStorage
       localStorage.setItem("logged_in", "true");
+      localStorage.setItem("username", username);
+      if (result.token) {
+        localStorage.setItem("jwt", result.token);
+      }
       setTimeout(() => navigate("/main/upload"), 1500); // redirect after login
     } else {
       setError(result.message || "Login failed");

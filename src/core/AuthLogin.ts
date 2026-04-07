@@ -4,6 +4,7 @@ import CryptoJS from "crypto-js";
 interface AuthResponse {
   success: boolean;
   token?: string;
+  username?: string;
   message?: string;
 }
 

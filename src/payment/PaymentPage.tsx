@@ -28,34 +28,38 @@ const PaymentPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState<boolean>(false);
 
+
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        setLoading(true);
+const fetchJobs = async () => {
+  try {
+    setLoading(true);
 
-        const res = await fetch("/api/queue/user");
-        if (!res.ok) {
-          throw new Error("Failed to fetch jobs");
-        }
+    const username = localStorage.getItem("username");
+    const res = await fetch(`http://localhost:5000/api/queue/${username}`);
 
-        const data: Job[] = await res.json();
+    if (!res.ok) {
+      throw new Error("Failed to fetch jobs");
+    }
 
-        const foundJob = data.find((j) => j.jobId === jobId);
+    const data: Job[] = await res.json();
 
-        if (!foundJob) {
-          setError("Job not found");
-        } else {
-          setJob(foundJob);
-        }
-      } catch (err: any) {
-        setError(err.message || "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    };
+    const foundJob = data.find((j) => j.jobId === jobId);
 
-    fetchJobs();
-  }, [jobId]);
+    if (!foundJob) {
+      setError("Job not found");
+    } else {
+      setJob(foundJob);
+    }
+  } catch (err: any) {
+    console.error("Queue fetch error:", err);
+    setError(err.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  fetchJobs();
+}, [jobId]);
 
   const calculatePrice = (): number => {
     if (!job) return 0;
@@ -89,7 +93,8 @@ const PaymentPage: React.FC = () => {
 
       // Backend now sets status to "queued"
       // Go back to queue page
-      navigate("/main/queue");
+      const username = localStorage.getItem("username");
+       navigate(`/main/queue/${username}`);
 
     } catch (err: any) {
       setError(err.message || "Payment failed");
