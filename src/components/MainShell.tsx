@@ -6,11 +6,22 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import QueueIcon from "@mui/icons-material/Queue";
 import PaymentIcon from "@mui/icons-material/Payment";
 import PersonIcon from "@mui/icons-material/Person";
-import { Box } from "@mui/material";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { Box, AppBar, Toolbar, Typography, IconButton } from "@mui/material";
 
 const MainShell: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Read username from localStorage (set during login)
+  const username = localStorage.getItem("username") || "Guest";
+
+  const handleLogout = () => {
+    localStorage.removeItem("logged_in");
+    localStorage.removeItem("username");
+    localStorage.removeItem("jwt");
+    navigate("/login");
+  };
 
   const tabs = [
     { label: "Upload", value: "/main/upload", icon: <CloudUploadIcon /> },
@@ -23,8 +34,6 @@ const MainShell: React.FC = () => {
     tabs.find((t) => location.pathname.startsWith(t.value))?.value ??
     "/main/upload";
 
-  // const handleLogout = () => { localStorage.removeItem("logged_in"); navigate("/login"); };
-
   return (
     <Box
       sx={{
@@ -36,13 +45,25 @@ const MainShell: React.FC = () => {
         position: "relative",
       }}
     >
+      {/* Top App Bar */}
+      <AppBar position="static" elevation={1} sx={{ zIndex: 999 }}>
+        <Toolbar variant="dense">
+          <Typography variant="subtitle1" sx={{ flexGrow: 1, fontWeight: 500 }}>
+            Hi, {username}!
+          </Typography>
+          <IconButton color="inherit" onClick={handleLogout} size="small" title="Logout">
+            <LogoutIcon fontSize="small" />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+
       {/* Content Area */}
       <Box
         sx={{
           flex: 1,
           overflow: "auto",
-          pb: "56px", // Height of bottom navigation
-          WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
+          pb: "56px",
+          WebkitOverflowScrolling: "touch",
         }}
       >
         <Outlet />
@@ -63,7 +84,6 @@ const MainShell: React.FC = () => {
           borderColor: "divider",
           boxShadow: "0 -2px 8px rgba(0,0,0,0.1)",
           zIndex: 1000,
-          // Safe area for devices with notches/home indicators
           paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >

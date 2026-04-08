@@ -10,7 +10,7 @@ import QueuePage from "./queue/QueuePage";
 import PaymentPage from "./payment/PaymentPage";
 import ProfilePage from "./profile/ProfilePage";
 import MainShell from "./components/MainShell";
-
+import GlobalQueuePage from "./queue/GlobalQueuePage";
 
 
 const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -62,9 +62,11 @@ const App: React.FC = () => {
 
           <Route path="upload" element={<UploadPage />} />
           <Route path="queue" element={<QueuePage />} />
+          <Route path="queue/:username" element={<QueuePage />} />
           <Route path="payment/:jobId" element={<PaymentPage />} />
           <Route path="history" element={<HistoryPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="global-queue" element={<GlobalQueuePage />} />
         </Route>
 
         {/* Default fallback */}

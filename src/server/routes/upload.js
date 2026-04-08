@@ -3,7 +3,10 @@ import multer from "multer";
 import jwt from "jsonwebtoken";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = Router();
 
@@ -27,14 +30,30 @@ function parsePageRanges(input) {
     });
 }
 
-const QUEUE_FILE = "./data/queue.json";
+const QUEUE_FILE = path.join(__dirname, "../../../data/queues.json");
 
 router.post("/api/upload", upload.single("file"), (req, res) => {
   try {
+    console.log("=== UPLOAD REQUEST RECEIVED ===");
+    console.log("File:", req.file?.originalname);
+    console.log("Body:", req.body);
+    console.log("Username:", req.body.username);
+
     // extract jwt (optional for now)
     const token = req.headers.authorization?.replace("Bearer ", "");
     const decoded = token ? jwt.decode(token) : null;
-    const userId = decoded?.userId || "guest";
+
+    // Get username from form data first, then fallback to JWT
+    let userId = req.body.username || decoded?.userId;
+
+    // Log for debugging
+    if (!userId) {
+      console.warn("WARNING: No username found. Using 'guest' as fallback.");
+      console.log("Request body:", req.body);
+      console.log("Decoded JWT:", decoded);
+    }
+
+    userId = userId || "guest";
 
     // fields
     const file = req.file;
@@ -57,31 +76,37 @@ router.post("/api/upload", upload.single("file"), (req, res) => {
     fs.mkdirSync(finalFolder, { recursive: true });
     fs.renameSync(file.path, finalPath);
 
-    // 🔽 🔽 🔽 MINIMAL QUEUE ADDITION 🔽 🔽 🔽
-    let queue = [];
-    // console.log("UPLOAD QUEUE_FILE:", path.resolve(QUEUE_FILE));
+    let queues = { global: [], users: {} };
     if (fs.existsSync(QUEUE_FILE)) {
-      const raw = fs.readFileSync(QUEUE_FILE, "utf-8").trim();
-      if (raw) queue = JSON.parse(raw);
+      try {
+        const raw = fs.readFileSync(QUEUE_FILE, "utf-8").trim();
+        if (raw) queues = JSON.parse(raw);
+      } catch (parseErr) {
+        console.error("ERROR parsing queue file:", parseErr);
+        // Start fresh if file is corrupted
+        queues = { global: [], users: {} };
+      }
     }
 
-    const exists = queue.some(job => job.jobId === jobId);
-
-    if (!exists) {
-      queue.push({
-        jobId,
-        userId,
-        filePath: finalPath,
-        fileName: jobId + ext,
-        pageRanges,
-        colorMode,
-        status: "pending-payment",
-        createdAt: Date.now()
-      });
-
-      fs.writeFileSync(QUEUE_FILE, JSON.stringify(queue, null, 2));
+    if (!queues.users[userId]) {
+      queues.users[userId] = [];
     }
-    // 🔼 🔼 🔼 END QUEUE ADDITION 🔼 🔼 🔼
+
+    const job = {
+      jobId,
+      userId,
+      filePath: finalPath,
+      fileName: jobId + ext,
+      pageRanges,
+      colorMode,
+      status: "pending-payment",
+      createdAt: Date.now()
+    };
+
+    queues.global.push(job);
+    queues.users[userId].push(job);
+
+    fs.writeFileSync(QUEUE_FILE, JSON.stringify(queues, null, 2));
 
     return res.json({
       jobId,

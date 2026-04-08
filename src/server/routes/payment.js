@@ -8,7 +8,7 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const queueFile = path.join(__dirname, '../../../data', 'queue.json');
+const queueFile = path.join(__dirname, '../../../data', 'queues.json'); // fix name too (was queues.json)
 
 router.post('/payment/user', (req, res) => {
   const { jobId } = req.body;
@@ -17,41 +17,39 @@ router.post('/payment/user', (req, res) => {
     return res.status(400).json({ error: 'jobId is required' });
   }
 
-  // Load queue.json
-  let jobs;
+  let data;
   try {
     const raw = fs.readFileSync(queueFile, 'utf8');
-    jobs = JSON.parse(raw);
+    data = JSON.parse(raw);
   } catch (err) {
     console.error('Failed to load queue file:', err);
     return res.status(500).json({ error: 'Queue storage error' });
   }
 
-  if (!Array.isArray(jobs)) {
+  if (!data.global || !Array.isArray(data.global)) {
     return res.status(500).json({ error: 'Invalid queue structure' });
   }
 
-  // Find job
-  const job = jobs.find(j => j.jobId === jobId);
+  // 🔍 Find job in global
+  const job = data.global.find(j => j.jobId === jobId);
 
   if (!job) {
     return res.status(404).json({ error: 'Job not found' });
   }
 
-  // Ensure correct status
   if (job.status !== 'pending-payment') {
     return res.status(400).json({
       error: `Job not in pending-payment state (current: ${job.status})`
     });
   }
 
-  // Calculate price
+  // 💰 Calculate price
   const pages = job.pageRanges.length;
   const pricePerPage = job.colorMode === 'bw' ? 2 : 7;
   const calculatedPrice = pages * pricePerPage;
 
-  // FIFO Queue Position Logic
-  const queuedJobs = jobs.filter(
+  // 📌 Queue position (from global)
+  const queuedJobs = data.global.filter(
     j => j.status === 'queued' && typeof j.queuePosition === 'number'
   );
 
@@ -60,15 +58,28 @@ router.post('/payment/user', (req, res) => {
       ? Math.max(...queuedJobs.map(j => j.queuePosition)) + 1
       : 1;
 
-  // Update job
+  // ✏️ Update global job
   job.status = 'queued';
   job.queuePosition = nextPosition;
   job.paidAt = Date.now();
   job.price = calculatedPrice;
 
-  // Save updated queue
+  // 🔁 ALSO update user-specific copy
+  if (data.users && data.users[job.userId]) {
+    const userJobs = data.users[job.userId];
+    const userJob = userJobs.find(j => j.jobId === jobId);
+
+    if (userJob) {
+      userJob.status = 'queued';
+      userJob.queuePosition = nextPosition;
+      userJob.paidAt = job.paidAt;
+      userJob.price = calculatedPrice;
+    }
+  }
+
+  // 💾 Save
   try {
-    fs.writeFileSync(queueFile, JSON.stringify(jobs, null, 2));
+    fs.writeFileSync(queueFile, JSON.stringify(data, null, 2));
   } catch (err) {
     console.error('Failed to write queue file:', err);
     return res.status(500).json({ error: 'Queue save error' });

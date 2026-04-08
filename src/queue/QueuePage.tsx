@@ -7,23 +7,25 @@ import {
   CircularProgress,
   Paper
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 type QueueJob = {
   jobId: string;
-  originalFileName: string;
+  userId: string;
+  fileName: string;
+  filePath: string;
   pageRanges: number[];
   colorMode: string;
   status: "pending-payment" | "queued" | "printing" | "done";
   createdAt: number;
-  queuePosition?: number; // ✅ added
+  queuePosition?: number;
 };
 
 const QueuePage: React.FC = () => {
   const [jobs, setJobs] = useState<QueueJob[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
+  const { username: paramUsername } = useParams<{ username: string }>();
   const navigate = useNavigate();
 
   const fetchJobs = async (): Promise<void> => {
@@ -31,7 +33,14 @@ const QueuePage: React.FC = () => {
     setError(null);
 
     try {
-      const res = await fetch(`/api/queue/user`);
+      // Use username from URL params if available, otherwise use localStorage
+      const username = paramUsername || localStorage.getItem("username");
+
+      if (!username) {
+        throw new Error("No username available");
+      }
+
+      const res = await fetch(`/api/queue/${username}`);
 
       if (!res.ok) {
         throw new Error("Failed to fetch queue");
@@ -58,7 +67,7 @@ const QueuePage: React.FC = () => {
 
   useEffect(() => {
     fetchJobs();
-  }, []);
+  }, [paramUsername]);
 
   const formatDate = (timestamp: number): string =>
     new Date(timestamp).toLocaleString(); // removed *1000 (your createdAt is already ms)
@@ -97,7 +106,7 @@ const QueuePage: React.FC = () => {
             <Paper key={job.jobId} sx={{ padding: 2 }}>
               <Stack spacing={1}>
                 <Typography variant="subtitle1" fontWeight={600}>
-                  {job.originalFileName}
+                  {job.fileName}
                 </Typography>
 
                 <Typography variant="body2">

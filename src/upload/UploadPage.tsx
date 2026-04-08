@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
@@ -19,6 +20,7 @@ const UploadPage: React.FC = () => {
   const [fileName, setFileName] = useState("");
   const [pageRanges, setPageRanges] = useState("");
   const [colorMode, setColorMode] = useState<"bw" | "color">("bw");
+  const navigate = useNavigate();
 
   // NEW STATE
   const [isUploading, setIsUploading] = useState(false);
@@ -43,7 +45,10 @@ const UploadPage: React.FC = () => {
     formData.append("pageRanges", pageRanges);
     formData.append("colorMode", colorMode);
 
-    const jwt = localStorage.getItem("jwt");
+  const username = localStorage.getItem("username") || "guest";
+  formData.append("username", username);
+  formData.append("fileName", file.name);
+  const jwt = localStorage.getItem("jwt");
 
     try {
       const res = await fetch("/api/upload", {
@@ -59,8 +64,9 @@ const UploadPage: React.FC = () => {
       if (!res.ok) {
         throw new Error(data?.error || "Upload failed");
       }
-
+      console.log("Uploading as:", localStorage.getItem("username"));
       setUploadSuccess(true);
+      setTimeout(() => navigate("/main/queue"), 1500);
     } catch (err: any) {
       console.error("Upload failed:", err);
       setUploadSuccess(false);
