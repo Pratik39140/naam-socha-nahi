@@ -16,7 +16,7 @@ export const loginUser = async (
     // Hash the password before sending
     const encryptedPassword = CryptoJS.SHA256(password).toString();
 
-    const response = await fetch("http://localhost:5000/login", {
+    const response = await fetch("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password: encryptedPassword }),

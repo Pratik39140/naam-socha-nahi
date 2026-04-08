@@ -3,5 +3,10 @@
     "username": "test1",
     "email": "random@gmail.com",
     "password": "8c2a4e8be0c04c814fc8af4263da47300bd5d2966650010010351434adba6a0e"
+  },
+  {
+    "username": "Pratik",
+    "email": "email@xyz.com",
+    "password": "f8eb6d89472fd118a80b785132d38f0aa7c3d6a98afeab979afd2a9686890dc4"
   }
 ]

@@ -6,9 +6,9 @@ import os from "os";
 import CryptoJS from "crypto-js";
 import { fileURLToPath } from "url";
 
-import uploadRoute from "./upload.js";
-import paymentRoute from "./payment.js";
-import queueRoute from "./queue.js";
+import uploadRoute from "./routes/upload.js";
+import paymentRoute from "./routes/payment.js";
+import queueRoute from "./routes/queue.js";
 
 const app = express();
 

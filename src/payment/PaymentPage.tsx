@@ -35,7 +35,7 @@ const fetchJobs = async () => {
     setLoading(true);
 
     const username = localStorage.getItem("username");
-    const res = await fetch(`http://localhost:5000/api/queue/${username}`);
+    const res = await fetch(`/api/queue/${username}`);
 
     if (!res.ok) {
       throw new Error("Failed to fetch jobs");

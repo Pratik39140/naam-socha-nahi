@@ -16,7 +16,7 @@ export const registerUser = async (
     // Hash the password before sending
     const encryptedPassword = CryptoJS.SHA256(password).toString();
 
-    const response = await fetch("http://localhost:5000/signup", {
+    const response = await fetch("/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password: encryptedPassword }),
