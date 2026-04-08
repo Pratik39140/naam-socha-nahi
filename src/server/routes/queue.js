@@ -68,6 +68,20 @@ router.post("/api/upload", (req, res) => {
   }
 });
 
+
+// ✅ Get global queue
+router.get("/api/queue/global", (req, res) => {
+  try {
+    const queues = readQueue();
+    const jobs = queues.global || [];
+    jobs.sort((a, b) => a.createdAt - b.createdAt);
+    return res.json(jobs);
+  } catch (err) {
+    console.error("GET /api/queue/global error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // ✅ Get individual user queue
 router.get("/api/queue/:username", (req, res) => {
   try {
@@ -82,17 +96,6 @@ router.get("/api/queue/:username", (req, res) => {
   }
 });
 
-// ✅ Get global queue
-router.get("/api/queue/global", (req, res) => {
-  try {
-    const queues = readQueue();
-    const jobs = queues.global || [];
-    jobs.sort((a, b) => a.createdAt - b.createdAt);
-    return res.json(jobs);
-  } catch (err) {
-    console.error("GET /api/queue/global error:", err);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-});
+
 
 export default router;
