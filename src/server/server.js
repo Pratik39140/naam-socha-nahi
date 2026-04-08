@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import uploadRoute from "./routes/upload.js";
 import paymentRoute from "./routes/payment.js";
 import queueRoute from "./routes/queue.js";
+import printRoute from "./routes/print.js";
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(express.json());
 app.use(uploadRoute);
 app.use('/api', paymentRoute);
 app.use(queueRoute);
+app.use(printRoute);
 
 
 // =============================
