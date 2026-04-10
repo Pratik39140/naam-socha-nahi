@@ -1,21 +1,51 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import express from 'express';
-import trayState from './print.js'; // Import shared tray state
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import express from "express";
+import { trayState } from "./print.js";
 
 const router = express.Router();
 
+// __dirname fix
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const queueFile = path.join(__dirname, '../../../data', 'queues.json');
+const QUEUE_FILE = path.join(__dirname, "../../../data/queues.json");
 
-router.post("/rpi/otp/collect", (req, res) => {
+// ==============================
+// 🧩 HELPERS (SAME AS PRINT FILE)
+// ==============================
+
+function readQueue() {
+  try {
+    if (!fs.existsSync(QUEUE_FILE)) {
+      return { global: [] };
+    }
+
+    const data = fs.readFileSync(QUEUE_FILE, "utf-8");
+    return JSON.parse(data || "{}");
+  } catch (err) {
+    console.error("Read error:", err);
+    return { global: [] };
+  }
+}
+
+function writeQueue(queue) {
+  try {
+    fs.writeFileSync(QUEUE_FILE, JSON.stringify(queue, null, 2));
+  } catch (err) {
+    console.error("Write error:", err);
+  }
+}
+
+// ==============================
+// 🔐 OTP VERIFY
+// ==============================
+
+router.post("/api/rpi/otp/collect", (req, res) => {
   try {
     const { otp } = req.body;
 
-    // ✅ Validate input
     if (!otp) {
       return res.status(400).json({ error: "OTP is required" });
     }
@@ -26,20 +56,27 @@ router.post("/rpi/otp/collect", (req, res) => {
       return res.status(500).json({ error: "Invalid queue structure" });
     }
 
-    // 🔍 Find job by OTP
-    const job = queue.global.find(j => j.otp === otp);
+    // ✅ SAFE MATCH (trim + string)
+    const job = queue.global.find(
+      j => String(j.otp).trim() === String(otp).trim()
+    );
 
-    // ❌ Not found
     if (!job) {
-      return res.status(400).json({ error: "Invalid or already used OTP" });
+      return res.status(400).json({ error: "Invalid OTP" });
     }
 
-    // ❌ Validate conditions
-    if (job.status !== "done" || job.otpUsed) {
-      return res.status(400).json({ error: "Invalid or already used OTP" });
+    if (job.status !== "done") {
+      return res.status(400).json({ error: "Job not ready" });
     }
 
-    // ✅ Valid → return minimal info
+    if (job.otpUsed) {
+      return res.status(400).json({ error: "OTP already used" });
+    }
+
+    if (typeof job.trayIndex !== "number") {
+      return res.status(400).json({ error: "Tray not assigned" });
+    }
+
     return res.json({
       jobId: job.jobId,
       trayIndex: job.trayIndex
@@ -50,35 +87,31 @@ router.post("/rpi/otp/collect", (req, res) => {
   }
 });
 
+// ==============================
+// 📦 COLLECTION COMPLETE
+// ==============================
 
-router.post("/rpi/collect/done", (req, res) => {
+router.post("/api/rpi/collect/done", (req, res) => {
   try {
     const { jobId } = req.body;
 
-    // ✅ Validate input
     if (!jobId) {
       return res.status(400).json({ error: "jobId is required" });
     }
 
     const queue = readQueue();
 
-    if (!queue.global || !Array.isArray(queue.global)) {
-      return res.status(500).json({ error: "Invalid queue structure" });
-    }
-
-    // 🔍 Find job
     const job = queue.global.find(j => j.jobId === jobId);
 
     if (!job) {
       return res.status(404).json({ error: "Job not found" });
     }
 
-    // ❌ Optional safety check
     if (job.status !== "done") {
-      return res.status(400).json({ error: "Job is not ready for collection" });
+      return res.status(400).json({ error: "Job not ready for collection" });
     }
 
-    // ✅ Free tray if exists
+    // ✅ Free tray
     if (typeof job.trayIndex === "number") {
       trayState[job.trayIndex] = false;
     }
@@ -86,19 +119,19 @@ router.post("/rpi/collect/done", (req, res) => {
     // ✅ Update job
     job.status = "collected";
     job.otpUsed = true;
+    job.collectedAt = Date.now();
 
-    // 💾 Save
     writeQueue(queue);
 
     res.json({
       success: true,
-      jobId: job.jobId,
-      trayFreed: job.trayIndex
+      jobId: job.jobId
     });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 export default router;

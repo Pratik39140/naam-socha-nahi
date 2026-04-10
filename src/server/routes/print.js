@@ -1,67 +1,75 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import express from 'express';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import express from "express";
 
 const router = express.Router();
 
-// __dirname replacement for ESM
+// __dirname (ESM fix)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const QUEUE_FILE = path.join(__dirname, "../../../data/queues.json");
 
 // 🧠 In-memory tray state
-const trayState = [false, false, false, false, false, false, false, false];
+export const trayState = [false, false, false, false, false, false, false, false];
 // false = free, true = occupied
 
-// Helper: Read queue
+// ==============================
+// 🧩 HELPERS (SAFE)
+// ==============================
+
 function readQueue() {
-  const data = fs.readFileSync(QUEUE_FILE, "utf-8");
-  return JSON.parse(data);
+  try {
+    if (!fs.existsSync(QUEUE_FILE)) {
+      return { global: [] };
+    }
+
+    const data = fs.readFileSync(QUEUE_FILE, "utf-8");
+    return JSON.parse(data || "{}");
+  } catch (err) {
+    console.error("Read error:", err);
+    return { global: [] };
+  }
 }
 
-// Helper: Write queue
 function writeQueue(queue) {
-  fs.writeFileSync(QUEUE_FILE, JSON.stringify(queue, null, 2));
+  try {
+    fs.writeFileSync(QUEUE_FILE, JSON.stringify(queue, null, 2));
+  } catch (err) {
+    console.error("Write error:", err);
+  }
 }
 
-// Helper: Find job in global queue
 function findJob(queue, jobId) {
-  return queue.global.find(job => job.jobId === jobId);
+  return queue.global.find(j => j.jobId === jobId);
 }
 
+// ==============================
+// 🚀 GET NEXT JOB
+// ==============================
 
-// assuming helpers are already imported
-// const { readQueue, writeQueue, findJob } = require("../utils/queueHelpers");
-
-
-// ✅ GET /queue/next
 router.get("/api/print/queue/next", (req, res) => {
   try {
     const queue = readQueue();
 
-    // 🚫 Only ONE job at a time
-    const isPrinting = queue.global.some(job => job.status === "printing");
-    if (isPrinting) {
-      return res.json(null);
-    }
+    // 🚫 Only one job at a time
+    const isPrinting = queue.global.some(j => j.status === "printing");
+    if (isPrinting) return res.json(null);
 
-    // ✅ Find first queued job (no order change)
-    const nextJob = queue.global.find(job => job.status === "queued");
+    // ✅ Get first queued job
+    const nextJob = queue.global.find(j => j.status === "queued");
 
-    if (!nextJob) {
-      return res.json(null);
-    }
-
-    res.json(nextJob);
+    return res.json(nextJob || null);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// ==============================
+// ▶️ START PRINT
+// ==============================
 
-// ✅ POST /print/start
 router.post("/api/print/start", (req, res) => {
   try {
     const { jobId } = req.body;
@@ -72,10 +80,9 @@ router.post("/api/print/start", (req, res) => {
 
     const queue = readQueue();
 
-    // 🚫 Prevent multiple printing jobs (extra safety)
-    const isPrinting = queue.global.some(job => job.status === "printing");
+    const isPrinting = queue.global.some(j => j.status === "printing");
     if (isPrinting) {
-      return res.status(400).json({ error: "Another job is already printing" });
+      return res.status(400).json({ error: "Another job is printing" });
     }
 
     const job = findJob(queue, jobId);
@@ -84,16 +91,24 @@ router.post("/api/print/start", (req, res) => {
       return res.status(404).json({ error: "Job not found" });
     }
 
+    if (job.status !== "queued") {
+      return res.status(400).json({ error: "Job not in queued state" });
+    }
+
     job.status = "printing";
 
     writeQueue(queue);
 
-    res.json({ success: true, job });
+    res.json({ success: true });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// ==============================
+// ✅ PRINT DONE
+// ==============================
 
 router.post("/api/print/done", (req, res) => {
   try {
@@ -110,33 +125,36 @@ router.post("/api/print/done", (req, res) => {
       return res.status(404).json({ error: "Job not found" });
     }
 
-    // 🔍 Find first free tray
+    if (job.status !== "printing") {
+      return res.status(400).json({ error: "Job not in printing state" });
+    }
+
+    // 🔍 Find free tray
     const trayIndex = trayState.findIndex(t => t === false);
 
     if (trayIndex === -1) {
       return res.status(400).json({ error: "No trays available" });
     }
 
-    // ✅ Mark tray occupied
+    // ✅ Occupy tray
     trayState[trayIndex] = true;
 
-    // ✅ Update job
+    // ✅ Update job (CRITICAL for OTP)
     job.status = "done";
     job.trayIndex = trayIndex;
     job.readyAt = Date.now();
+    job.otpUsed = false; // ensure fresh
 
-    // 💾 Save queue
     writeQueue(queue);
 
     res.json({
       success: true,
-      job
+      trayIndex
     });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
-
 
 export default router;
