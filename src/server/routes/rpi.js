@@ -101,6 +101,7 @@ router.post("/api/rpi/collect/done", (req, res) => {
 
     const queue = readQueue();
 
+    // 🔍 Find job in global
     const job = queue.global.find(j => j.jobId === jobId);
 
     if (!job) {
@@ -116,10 +117,23 @@ router.post("/api/rpi/collect/done", (req, res) => {
       trayState[job.trayIndex] = false;
     }
 
-    // ✅ Update job
+    // ✅ Update GLOBAL job
     job.status = "collected";
     job.otpUsed = true;
     job.collectedAt = Date.now();
+
+    // 🔥 ALSO UPDATE USER-SPECIFIC COPY
+    const userJobs = queue.users[job.userId];
+
+    if (Array.isArray(userJobs)) {
+      const userJob = userJobs.find(j => j.jobId === jobId);
+
+      if (userJob) {
+        userJob.status = "collected";
+        userJob.otpUsed = true;
+        userJob.collectedAt = job.collectedAt; // keep consistent timestamp
+      }
+    }
 
     writeQueue(queue);
 
