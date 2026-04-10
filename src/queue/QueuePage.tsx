@@ -19,6 +19,10 @@ type QueueJob = {
   status: "pending-payment" | "queued" | "printing" | "done";
   createdAt: number;
   queuePosition?: number;
+
+  // ✅ OTP fields
+  otp?: string;
+  otpUsed?: boolean;
 };
 
 const QueuePage: React.FC = () => {
@@ -33,7 +37,6 @@ const QueuePage: React.FC = () => {
     setError(null);
 
     try {
-      // Use username from URL params if available, otherwise use localStorage
       const username = paramUsername || localStorage.getItem("username");
 
       if (!username) {
@@ -48,7 +51,7 @@ const QueuePage: React.FC = () => {
 
       const data: QueueJob[] = await res.json();
 
-      // ✅ Sort queued jobs by queuePosition (FIFO order)
+      // ✅ Sort queued jobs by queuePosition
       const sorted = [...data].sort((a, b) => {
         if (a.status === "queued" && b.status === "queued") {
           return (a.queuePosition ?? 0) - (b.queuePosition ?? 0);
@@ -70,7 +73,7 @@ const QueuePage: React.FC = () => {
   }, [paramUsername]);
 
   const formatDate = (timestamp: number): string =>
-    new Date(timestamp).toLocaleString(); // removed *1000 (your createdAt is already ms)
+    new Date(timestamp).toLocaleString();
 
   return (
     <Container maxWidth="sm" sx={{ paddingY: 4 }}>
@@ -136,9 +139,52 @@ const QueuePage: React.FC = () => {
                 )}
 
                 {job.status === "queued" && (
-                  <Typography variant="body2" color="text.secondary">
-                    Queue position: {job.queuePosition ?? "—"}
-                  </Typography>
+                  <Stack spacing={1} sx={{ marginTop: 1 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Queue position: {job.queuePosition ?? "—"}
+                    </Typography>
+
+                    {job.otp && (
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          px: 2,
+                          py: 1.5,
+                          borderRadius: 2,
+                          backgroundColor: "rgba(255,255,255,0.05)",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between"
+                        }}
+                      >
+                        <Stack spacing={0.3}>
+                          <Typography variant="caption" color="text.secondary">
+                            Pickup Code
+                          </Typography>
+
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontFamily: "monospace",
+                              letterSpacing: 2,
+                              fontWeight: 600
+                            }}
+                          >
+                            {job.otp}
+                          </Typography>
+                        </Stack>
+
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ textAlign: "right", maxWidth: 120 }}
+                        >
+                          Show at kiosk
+                        </Typography>
+                      </Paper>
+                    )}
+                  </Stack>
                 )}
               </Stack>
             </Paper>

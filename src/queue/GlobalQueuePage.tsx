@@ -1,3 +1,7 @@
+// Why does this exist??
+
+
+
 import { useEffect, useState } from "react";
 
 type GlobalJob = {

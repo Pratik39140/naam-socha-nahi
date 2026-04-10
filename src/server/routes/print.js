@@ -11,6 +11,10 @@ const __dirname = path.dirname(__filename);
 
 const QUEUE_FILE = path.join(__dirname, "../../../data/queues.json");
 
+// 🧠 In-memory tray state
+const trayState = [false, false, false, false, false, false, false, false];
+// false = free, true = occupied
+
 // Helper: Read queue
 function readQueue() {
   const data = fs.readFileSync(QUEUE_FILE, "utf-8");
@@ -91,7 +95,6 @@ router.post("/api/print/start", (req, res) => {
 });
 
 
-// ✅ POST /print/done
 router.post("/api/print/done", (req, res) => {
   try {
     const { jobId } = req.body;
@@ -107,11 +110,28 @@ router.post("/api/print/done", (req, res) => {
       return res.status(404).json({ error: "Job not found" });
     }
 
-    job.status = "done";
+    // 🔍 Find first free tray
+    const trayIndex = trayState.findIndex(t => t === false);
 
+    if (trayIndex === -1) {
+      return res.status(400).json({ error: "No trays available" });
+    }
+
+    // ✅ Mark tray occupied
+    trayState[trayIndex] = true;
+
+    // ✅ Update job
+    job.status = "done";
+    job.trayIndex = trayIndex;
+    job.readyAt = Date.now();
+
+    // 💾 Save queue
     writeQueue(queue);
 
-    res.json({ success: true, job });
+    res.json({
+      success: true,
+      job
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
