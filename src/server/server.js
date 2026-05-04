@@ -11,6 +11,7 @@ import paymentRoute from "./routes/payment.js";
 import queueRoute from "./routes/queue.js";
 import printRoute from "./routes/print.js";
 import rpiRoute from "./routes/rpi.js";
+import filesRoute from "./routes/files.js";
 
 const app = express();
 
@@ -34,7 +35,7 @@ app.use('/api', paymentRoute);
 app.use(queueRoute);
 app.use(printRoute);
 app.use(rpiRoute);
-
+app.use(filesRoute);
 
 // =============================
 // DEBUG route (optional)
