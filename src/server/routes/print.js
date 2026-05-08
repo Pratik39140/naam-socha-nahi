@@ -112,48 +112,34 @@ router.post("/api/print/start", (req, res) => {
 
 router.post("/api/print/done", (req, res) => {
   try {
-    const { jobId } = req.body;
-
-    if (!jobId) {
-      return res.status(400).json({ error: "jobId is required" });
+    const { jobId, trayIndex } = req.body;
+    if (!jobId){
+      return res.status(400).json({error: "jobId is required"});
+    }
+    if (typeof trayIndex !== "number" || trayIndex < 0 || trayIndex > 7){
+      return res.status(400).json({error: "valid trayIndex (0-7) is required"});
     }
 
     const queue = readQueue();
     const job = findJob(queue, jobId);
-
-    if (!job) {
-      return res.status(404).json({ error: "Job not found" });
+    if (!job){
+      return res.status(404).json({error: "Job not found"});
+    }
+    if (job.status !== "printing"){
+      return res.status(400).json({error: "Job is not in printing state"});
     }
 
-    if (job.status !== "printing") {
-      return res.status(400).json({ error: "Job not in printing state" });
-    }
-
-    // 🔍 Find free tray
-    const trayIndex = trayState.findIndex(t => t === false);
-
-    if (trayIndex === -1) {
-      return res.status(400).json({ error: "No trays available" });
-    }
-
-    // ✅ Occupy tray
     trayState[trayIndex] = true;
 
-    // ✅ Update job (CRITICAL for OTP)
     job.status = "done";
     job.trayIndex = trayIndex;
     job.readyAt = Date.now();
-    job.otpUsed = false; // ensure fresh
-
+    job.otpUsed = false;
     writeQueue(queue);
-
-    res.json({
-      success: true,
-      trayIndex
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    
+    res.json({ success: true, trayIndex});
+  } catch(err){
+    res.status(500).json({error: err.message});
   }
 });
 
