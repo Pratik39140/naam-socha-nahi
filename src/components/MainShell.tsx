@@ -4,16 +4,14 @@ import BottomNavigation from "@mui/material/BottomNavigation";
 import BottomNavigationAction from "@mui/material/BottomNavigationAction";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import QueueIcon from "@mui/icons-material/Queue";
-import PaymentIcon from "@mui/icons-material/Payment";
+import HistoryIcon from "@mui/icons-material/History";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { Box, AppBar, Toolbar, Typography, IconButton } from "@mui/material";
+import { Box, AppBar, Toolbar, Typography, IconButton, Chip } from "@mui/material";
 
 const MainShell: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Read username from localStorage (set during login)
   const username = localStorage.getItem("username") || "Guest";
 
   const handleLogout = () => {
@@ -26,7 +24,7 @@ const MainShell: React.FC = () => {
   const tabs = [
     { label: "Upload", value: "/main/upload", icon: <CloudUploadIcon /> },
     { label: "Queue", value: "/main/queue", icon: <QueueIcon /> },
-    { label: "History", value: "/main/history", icon: <PaymentIcon /> },
+    { label: "History", value: "/main/history", icon: <HistoryIcon /> },
     { label: "Profile", value: "/main/profile", icon: <PersonIcon /> },
   ];
 
@@ -35,41 +33,81 @@ const MainShell: React.FC = () => {
     "/main/upload";
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100vh",
-        width: "100vw",
-        overflow: "hidden",
-        position: "relative",
-      }}
-    >
+    <Box sx={{
+      display: "flex",
+      flexDirection: "column",
+      height: "100vh",
+      width: "100vw",
+      overflow: "hidden",
+      position: "relative",
+    }}>
       {/* Top App Bar */}
-      <AppBar position="static" elevation={1} sx={{ zIndex: 999 }}>
-        <Toolbar variant="dense">
-          <Typography variant="subtitle1" sx={{ flexGrow: 1, fontWeight: 500 }}>
-            Hi, {username}!
-          </Typography>
-          <IconButton color="inherit" onClick={handleLogout} size="small" title="Logout">
+      <AppBar position="static" elevation={0}>
+        <Toolbar variant="dense" sx={{ minHeight: 52, px: 2 }}>
+          {/* Logo mark */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexGrow: 1 }}>
+            <Box sx={{
+              width: 8, height: 8, borderRadius: "50%",
+              background: "#3b82f6",
+              boxShadow: "0 0 8px #3b82f6",
+            }} />
+            <Typography variant="subtitle1" sx={{
+              fontWeight: 700,
+              letterSpacing: "-0.3px",
+              color: "#f1f5f9",
+            }}>
+              PrintMate
+            </Typography>
+            <Typography sx={{ color: "#475569", fontSize: 13, fontWeight: 300 }}>
+              / {username}
+            </Typography>
+          </Box>
+
+          {/* Status chip */}
+          <Chip
+            label="● ONLINE"
+            size="small"
+            sx={{
+              fontSize: 10,
+              fontFamily: "'JetBrains Mono', monospace",
+              color: "#22c55e",
+              background: "#22c55e12",
+              border: "1px solid #22c55e30",
+              height: 22,
+              mr: 1,
+              "& .MuiChip-label": { px: 1 },
+            }}
+          />
+
+          <IconButton
+            color="inherit"
+            onClick={handleLogout}
+            size="small"
+            title="Logout"
+            sx={{
+              color: "#475569",
+              "&:hover": { color: "#ef4444", background: "#ef444412" },
+              transition: "all 0.2s",
+            }}
+          >
             <LogoutIcon fontSize="small" />
           </IconButton>
         </Toolbar>
       </AppBar>
 
       {/* Content Area */}
-      <Box
-        sx={{
-          flex: 1,
-          overflow: "auto",
-          pb: "56px",
-          WebkitOverflowScrolling: "touch",
-        }}
-      >
+      <Box sx={{
+        flex: 1,
+        overflow: "auto",
+        pb: "64px",
+        WebkitOverflowScrolling: "touch",
+        position: "relative",
+        zIndex: 1,
+      }}>
         <Outlet />
       </Box>
 
-      {/* Bottom Navigation - Fixed */}
+      {/* Bottom Navigation */}
       <BottomNavigation
         value={current}
         onChange={(_, newValue) => navigate(newValue)}
@@ -80,11 +118,8 @@ const MainShell: React.FC = () => {
           left: 0,
           right: 0,
           width: "100%",
-          borderTop: "1px solid",
-          borderColor: "divider",
-          boxShadow: "0 -2px 8px rgba(0,0,0,0.1)",
-          zIndex: 1000,
           paddingBottom: "env(safe-area-inset-bottom)",
+          zIndex: 1000,
         }}
       >
         {tabs.map((tab) => (
@@ -93,13 +128,7 @@ const MainShell: React.FC = () => {
             label={tab.label}
             value={tab.value}
             icon={tab.icon}
-            sx={{
-              minWidth: "60px",
-              padding: "6px 12px",
-              "& .MuiBottomNavigationAction-label": {
-                fontSize: "0.75rem",
-              },
-            }}
+            sx={{ minWidth: 60 }}
           />
         ))}
       </BottomNavigation>

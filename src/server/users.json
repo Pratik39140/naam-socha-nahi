@@ -13,5 +13,25 @@
     "username": "Om",
     "email": "ommalode33@gmail.com",
     "password": "7cf34f48ae1fc07d52ae506b3267b219ce5df6cb61446dbbcde24b031bcce931"
+  },
+  {
+    "username": "SignandLoginCheck",
+    "email": "SignandLoginCheck@yahoo.com",
+    "password": "56f2a49a45e8fb99bbec34058a5cf79ed2e8b2c21307671ca3d602e3798c9216"
+  },
+  {
+    "username": "UploadCheck",
+    "email": "SignandLoginCheck",
+    "password": "56f2a49a45e8fb99bbec34058a5cf79ed2e8b2c21307671ca3d602e3798c9216"
+  },
+  {
+    "username": "UploadCheckFR",
+    "email": "UploadCheck@yahoo.com",
+    "password": "3ba2cbc5f8004fa1c9d450701d5a52f3538ca4e2d459e3db222607f9674f3672"
+  },
+  {
+    "username": "MobileCheck",
+    "email": "MobileCheck@yahoo.com",
+    "password": "93492fc370dd17aa2a4650cba2842f296fb66b349e5c80c45bf7849da3c14cb8"
   }
 ]
