@@ -44,9 +44,15 @@ const QueuePage: React.FC = () => {
       const res = await fetch(`/api/queue/${username}`);
       if (!res.ok) throw new Error("Failed to fetch queue");
       const data: QueueJob[] = await res.json();
-      const sorted = [...data].sort((a, b) => {
-        if (a.status === "queued" && b.status === "queued")
+
+      // ✅ Exclude collected jobs (they appear in History instead)
+      const active = data.filter((job) => job.status !== "collected");
+
+      // ✅ Sort queued jobs by queuePosition
+      const sorted = [...active].sort((a, b) => {
+        if (a.status === "queued" && b.status === "queued") {
           return (a.queuePosition ?? 0) - (b.queuePosition ?? 0);
+        }
         return 0;
       });
       setJobs(sorted);
