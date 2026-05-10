@@ -14,18 +14,22 @@ type QueueJob = {
   filePath: string;
   pageRanges: number[];
   colorMode: string;
-  status: "pending-payment" | "queued" | "printing" | "done";
+  status: "pending-payment" | "queued" | "printing" | "done" | "collected";
   createdAt: number;
   queuePosition?: number;
   otp?: string;
   otpUsed?: boolean;
 };
 
-const STATUS_CONFIG = {
-  "pending-payment": { label: "Awaiting Payment", color: "#f59e0b",  bg: "#f59e0b15", border: "#f59e0b30" },
-  "queued":          { label: "In Queue",         color: "#F69E3D",  bg: "#F69E3D15", border: "#F69E3D30" },
-  "printing":        { label: "Printing",          color: "#14b8a6",  bg: "#14b8a615", border: "#14b8a630" },
-  "done":            { label: "Done",              color: "#22c55e",  bg: "#22c55e15", border: "#22c55e30" },
+// ✅ Only define configs for active queue statuses
+const STATUS_CONFIG: Record<
+  Exclude<QueueJob["status"], "collected">,
+  { label: string; color: string; bg: string; border: string }
+> = {
+  "pending-payment": { label: "Awaiting Payment", color: "#f59e0b", bg: "#f59e0b15", border: "#f59e0b30" },
+  "queued":          { label: "In Queue",         color: "#F69E3D", bg: "#F69E3D15", border: "#F69E3D30" },
+  "printing":        { label: "Printing",         color: "#14b8a6", bg: "#14b8a615", border: "#14b8a630" },
+  "done":            { label: "Done",             color: "#22c55e", bg: "#22c55e15", border: "#22c55e30" },
 };
 
 const QueuePage: React.FC = () => {
@@ -115,7 +119,8 @@ const QueuePage: React.FC = () => {
       {/* Job Cards */}
       <Stack spacing={2}>
         {!loading && jobs.map((job) => {
-          const s = STATUS_CONFIG[job.status] ?? STATUS_CONFIG["queued"];
+          // inside .map()
+          const s = STATUS_CONFIG[job.status as Exclude<QueueJob["status"], "collected">];
           return (
             <Box key={job.jobId} sx={{
               background: "#373A3C", border: "1px solid #5E6266",
