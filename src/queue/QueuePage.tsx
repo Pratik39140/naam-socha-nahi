@@ -22,10 +22,10 @@ type QueueJob = {
 };
 
 const STATUS_CONFIG = {
-  "pending-payment": { label: "Awaiting Payment", color: "#f59e0b", bg: "#f59e0b15", border: "#f59e0b30" },
-  "queued":          { label: "In Queue",         color: "#3b82f6", bg: "#3b82f615", border: "#3b82f630" },
-  "printing":        { label: "Printing",          color: "#14b8a6", bg: "#14b8a615", border: "#14b8a630" },
-  "done":            { label: "Done",              color: "#22c55e", bg: "#22c55e15", border: "#22c55e30" },
+  "pending-payment": { label: "Awaiting Payment", color: "#f59e0b",  bg: "#f59e0b15", border: "#f59e0b30" },
+  "queued":          { label: "In Queue",         color: "#F69E3D",  bg: "#F69E3D15", border: "#F69E3D30" },
+  "printing":        { label: "Printing",          color: "#14b8a6",  bg: "#14b8a615", border: "#14b8a630" },
+  "done":            { label: "Done",              color: "#22c55e",  bg: "#22c55e15", border: "#22c55e30" },
 };
 
 const QueuePage: React.FC = () => {
@@ -66,20 +66,15 @@ const QueuePage: React.FC = () => {
       {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
         <Box>
-          <Typography variant="h6" sx={{ color: "#f1f5f9" }}>Print Queue</Typography>
-          <Typography sx={{ fontSize: 12, color: "#475569", fontFamily: "'JetBrains Mono', monospace" }}>
+          <Typography variant="h6" sx={{ color: "#F2F2F2" }}>Print Queue</Typography>
+          <Typography sx={{ fontSize: 12, color: "#B0B3B8", fontFamily: "'JetBrains Mono', monospace" }}>
             {jobs.length} job{jobs.length !== 1 ? "s" : ""} found
           </Typography>
         </Box>
-        <Button
-          variant="outlined"
-          size="small"
+        <Button variant="outlined" size="small"
           startIcon={<RefreshIcon sx={{ fontSize: 16 }} />}
           onClick={fetchJobs}
-          sx={{
-            borderColor: "#1e2d47", color: "#64748b", fontSize: 12,
-            "&:hover": { borderColor: "#3b82f6", color: "#3b82f6", background: "#3b82f610" },
-          }}
+          sx={{ fontSize: 12 }}
         >
           Refresh
         </Button>
@@ -88,23 +83,23 @@ const QueuePage: React.FC = () => {
       {/* Loading */}
       {loading && (
         <Stack alignItems="center" py={6} gap={2}>
-          <CircularProgress size={32} sx={{ color: "#3b82f6" }} />
-          <Typography sx={{ fontSize: 13, color: "#475569" }}>Loading jobs…</Typography>
+          <CircularProgress size={32} />
+          <Typography sx={{ fontSize: 13, color: "#B0B3B8" }}>Loading jobs…</Typography>
         </Stack>
       )}
 
       {/* Error */}
       {!loading && error && (
-        <Box sx={{ p: 2, borderRadius: 2, background: "#ef444410", border: "1px solid #ef444430" }}>
-          <Typography sx={{ color: "#ef4444", fontSize: 14 }}>{error}</Typography>
+        <Box sx={{ p: 2, borderRadius: 2, background: "#D9302510", border: "1px solid #D9302530" }}>
+          <Typography sx={{ color: "#D93025", fontSize: 14 }}>{error}</Typography>
         </Box>
       )}
 
       {/* Empty */}
       {!loading && !error && jobs.length === 0 && (
         <Stack alignItems="center" py={8} gap={2}>
-          <PrintIcon sx={{ fontSize: 48, color: "#1e2d47" }} />
-          <Typography sx={{ color: "#475569", fontSize: 14 }}>No print jobs yet</Typography>
+          <PrintIcon sx={{ fontSize: 48, color: "#5E6266" }} />
+          <Typography sx={{ color: "#B0B3B8", fontSize: 14 }}>No print jobs yet</Typography>
           <Button variant="contained" size="small" onClick={() => navigate("/main/upload")}>
             Upload a Document
           </Button>
@@ -117,17 +112,15 @@ const QueuePage: React.FC = () => {
           const s = STATUS_CONFIG[job.status] ?? STATUS_CONFIG["queued"];
           return (
             <Box key={job.jobId} sx={{
-              background: "#111827",
-              border: "1px solid #1e2d47",
-              borderRadius: 3,
-              p: "20px",
+              background: "#373A3C", border: "1px solid #5E6266",
+              borderRadius: 3, p: "20px",
               transition: "border-color 0.2s",
-              "&:hover": { borderColor: "#334155" },
+              "&:hover": { borderColor: "#9FA3A7" },
             }}>
               {/* Top row */}
               <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={1.5}>
                 <Typography sx={{
-                  fontWeight: 600, fontSize: 14, color: "#f1f5f9",
+                  fontWeight: 600, fontSize: 14, color: "#F2F2F2",
                   maxWidth: "65%", overflow: "hidden",
                   textOverflow: "ellipsis", whiteSpace: "nowrap",
                 }}>
@@ -150,8 +143,8 @@ const QueuePage: React.FC = () => {
                   ["Date", formatDate(job.createdAt)],
                 ].map(([k, v]) => (
                   <Box key={String(k)}>
-                    <Typography sx={{ fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase" }}>{k}</Typography>
-                    <Typography sx={{ fontSize: 12, color: "#94a3b8" }}>{v}</Typography>
+                    <Typography sx={{ fontSize: 10, color: "#5E6266", fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase" }}>{k}</Typography>
+                    <Typography sx={{ fontSize: 12, color: "#9FA3A7" }}>{v}</Typography>
                   </Box>
                 ))}
               </Stack>
@@ -160,10 +153,10 @@ const QueuePage: React.FC = () => {
               {job.status === "queued" && job.queuePosition != null && (
                 <Box sx={{
                   display: "inline-flex", alignItems: "center", gap: 1,
-                  background: "#3b82f610", border: "1px solid #3b82f620",
+                  background: "#F69E3D10", border: "1px solid #F69E3D20",
                   borderRadius: 1.5, px: 1.5, py: 0.5, mb: 1.5,
                 }}>
-                  <Typography sx={{ fontSize: 11, color: "#3b82f6", fontFamily: "'JetBrains Mono', monospace" }}>
+                  <Typography sx={{ fontSize: 11, color: "#F69E3D", fontFamily: "'JetBrains Mono', monospace" }}>
                     Queue position #{job.queuePosition}
                   </Typography>
                 </Box>
@@ -173,28 +166,27 @@ const QueuePage: React.FC = () => {
               {job.otp && (
                 <Box sx={{
                   mt: 1.5, p: "14px 18px",
-                  background: "#0b0f1a",
-                  border: "1px solid #1e2d47",
+                  background: "#1A1A1A", border: "1px solid #5E6266",
                   borderRadius: 2,
                   display: "flex", alignItems: "center", justifyContent: "space-between",
                 }}>
                   <Box>
-                    <Typography sx={{ fontSize: 10, color: "#475569", fontFamily: "'JetBrains Mono', monospace", mb: 0.5 }}>
+                    <Typography sx={{ fontSize: 10, color: "#B0B3B8", fontFamily: "'JetBrains Mono', monospace", mb: 0.5 }}>
                       PICKUP CODE
                     </Typography>
                     <Typography sx={{
                       fontFamily: "'JetBrains Mono', monospace",
                       fontSize: 22, fontWeight: 700,
-                      letterSpacing: "0.2em", color: "#3b82f6",
+                      letterSpacing: "0.2em", color: "#F69E3D",
                     }}>
                       {job.otp}
                     </Typography>
                   </Box>
                   <Box sx={{
-                    background: "#3b82f610", border: "1px solid #3b82f620",
+                    background: "#F69E3D10", border: "1px solid #F69E3D20",
                     borderRadius: 1.5, px: 1.5, py: 0.75,
                   }}>
-                    <Typography sx={{ fontSize: 10, color: "#3b82f6", fontFamily: "'JetBrains Mono', monospace", textAlign: "center" }}>
+                    <Typography sx={{ fontSize: 10, color: "#F69E3D", fontFamily: "'JetBrains Mono', monospace", textAlign: "center" }}>
                       SHOW AT<br />KIOSK
                     </Typography>
                   </Box>
@@ -203,12 +195,8 @@ const QueuePage: React.FC = () => {
 
               {/* Pay button */}
               {job.status === "pending-payment" && (
-                <Button
-                  variant="contained"
-                  fullWidth
-                  sx={{ mt: 2 }}
-                  onClick={() => navigate(`/main/payment/${job.jobId}`)}
-                >
+                <Button variant="contained" fullWidth sx={{ mt: 2 }}
+                  onClick={() => navigate(`/main/payment/${job.jobId}`)}>
                   Pay Now →
                 </Button>
               )}

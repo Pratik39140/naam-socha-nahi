@@ -46,17 +46,14 @@ const LoginPage: React.FC = () => {
           <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1.2, mb: 1.5 }}>
             <Box sx={{
               width: 12, height: 12, borderRadius: "50%",
-              background: "#3b82f6",
-              boxShadow: "0 0 12px #3b82f6",
+              background: "#F69E3D",
+              boxShadow: "0 0 12px #F69E3D",
             }} />
-            <Typography sx={{
-              fontSize: 24, fontWeight: 700,
-              letterSpacing: "-0.5px", color: "#f1f5f9",
-            }}>
+            <Typography sx={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", color: "#F2F2F2" }}>
               PrintMate
             </Typography>
           </Box>
-          <Typography sx={{ fontSize: 13, color: "#475569", fontFamily: "'JetBrains Mono', monospace" }}>
+          <Typography sx={{ fontSize: 13, color: "#5E6266", fontFamily: "'JetBrains Mono', monospace" }}>
             Vending Print System — NODE-04
           </Typography>
         </Box>
@@ -64,22 +61,20 @@ const LoginPage: React.FC = () => {
         {/* Card */}
         <Card>
           <CardContent sx={{ p: "28px !important" }}>
-            <Typography variant="h6" sx={{ mb: 0.5, color: "#f1f5f9" }}>
+            <Typography variant="h6" sx={{ mb: 0.5, color: "#F2F2F2" }}>
               Welcome back
             </Typography>
-            <Typography sx={{ fontSize: 13, color: "#475569", mb: 3 }}>
+            <Typography sx={{ fontSize: 13, color: "#B0B3B8", mb: 3 }}>
               Sign in to your account to continue
             </Typography>
 
-            <TextField
-              fullWidth label="Username" margin="normal"
+            <TextField fullWidth label="Username" margin="normal"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onKeyDown={handleKeyDown}
               autoComplete="username"
             />
-            <TextField
-              fullWidth label="Password" margin="normal" type="password"
+            <TextField fullWidth label="Password" margin="normal" type="password"
               value={password}
               error={!!error}
               helperText={error}
@@ -88,19 +83,14 @@ const LoginPage: React.FC = () => {
               autoComplete="current-password"
             />
 
-            <Button
-              fullWidth variant="contained" color="primary"
-              sx={{ mt: 3, py: 1.3 }}
-              onClick={handleSubmit}
-            >
+            <Button fullWidth variant="contained" color="primary" sx={{ mt: 3, py: 1.3 }} onClick={handleSubmit}>
               Sign In
             </Button>
 
             <Box mt={2.5} textAlign="center">
-              <Typography sx={{ fontSize: 13, color: "#475569" }}>
+              <Typography sx={{ fontSize: 13, color: "#B0B3B8" }}>
                 Don't have an account?{" "}
-                <Link component={RouterLink} to="/signup"
-                  sx={{ color: "#3b82f6", fontWeight: 600 }}>
+                <Link component={RouterLink} to="/signup" sx={{ color: "#F69E3D", fontWeight: 600 }}>
                   Sign up
                 </Link>
               </Typography>
@@ -108,11 +98,7 @@ const LoginPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Footer hint */}
-        <Typography sx={{
-          textAlign: "center", mt: 3, fontSize: 11,
-          color: "#334155", fontFamily: "'JetBrains Mono', monospace",
-        }}>
+        <Typography sx={{ textAlign: "center", mt: 3, fontSize: 11, color: "#5E6266", fontFamily: "'JetBrains Mono', monospace" }}>
           Secure · Encrypted · Fast
         </Typography>
       </Box>

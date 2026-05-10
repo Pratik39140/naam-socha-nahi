@@ -34,59 +34,41 @@ const MainShell: React.FC = () => {
 
   return (
     <Box sx={{
-      display: "flex",
-      flexDirection: "column",
-      height: "100vh",
-      width: "100vw",
-      overflow: "hidden",
-      position: "relative",
+      display: "flex", flexDirection: "column",
+      height: "100vh", width: "100vw",
+      overflow: "hidden", position: "relative",
     }}>
-      {/* Top App Bar */}
       <AppBar position="static" elevation={0}>
         <Toolbar variant="dense" sx={{ minHeight: 52, px: 2 }}>
-          {/* Logo mark */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexGrow: 1 }}>
             <Box sx={{
               width: 8, height: 8, borderRadius: "50%",
-              background: "#3b82f6",
-              boxShadow: "0 0 8px #3b82f6",
+              background: "#F69E3D",
+              boxShadow: "0 0 8px #F69E3D",
             }} />
-            <Typography variant="subtitle1" sx={{
-              fontWeight: 700,
-              letterSpacing: "-0.3px",
-              color: "#f1f5f9",
-            }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, letterSpacing: "-0.3px", color: "#F2F2F2" }}>
               PrintMate
             </Typography>
-            <Typography sx={{ color: "#475569", fontSize: 13, fontWeight: 300 }}>
+            <Typography sx={{ color: "#5E6266", fontSize: 13, fontWeight: 300 }}>
               / {username}
             </Typography>
           </Box>
 
-          {/* Status chip */}
           <Chip
             label="● ONLINE"
             size="small"
             sx={{
-              fontSize: 10,
-              fontFamily: "'JetBrains Mono', monospace",
-              color: "#22c55e",
-              background: "#22c55e12",
-              border: "1px solid #22c55e30",
-              height: 22,
-              mr: 1,
+              fontSize: 10, fontFamily: "'JetBrains Mono', monospace",
+              color: "#22c55e", background: "#22c55e12",
+              border: "1px solid #22c55e30", height: 22, mr: 1,
               "& .MuiChip-label": { px: 1 },
             }}
           />
 
-          <IconButton
-            color="inherit"
-            onClick={handleLogout}
-            size="small"
-            title="Logout"
+          <IconButton color="inherit" onClick={handleLogout} size="small" title="Logout"
             sx={{
-              color: "#475569",
-              "&:hover": { color: "#ef4444", background: "#ef444412" },
+              color: "#5E6266",
+              "&:hover": { color: "#D93025", background: "#D9302512" },
               transition: "all 0.2s",
             }}
           >
@@ -95,41 +77,18 @@ const MainShell: React.FC = () => {
         </Toolbar>
       </AppBar>
 
-      {/* Content Area */}
-      <Box sx={{
-        flex: 1,
-        overflow: "auto",
-        pb: "64px",
-        WebkitOverflowScrolling: "touch",
-        position: "relative",
-        zIndex: 1,
-      }}>
+      <Box sx={{ flex: 1, overflow: "auto", pb: "64px", WebkitOverflowScrolling: "touch", position: "relative", zIndex: 1 }}>
         <Outlet />
       </Box>
 
-      {/* Bottom Navigation */}
       <BottomNavigation
         value={current}
         onChange={(_, newValue) => navigate(newValue)}
         showLabels
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: "100%",
-          paddingBottom: "env(safe-area-inset-bottom)",
-          zIndex: 1000,
-        }}
+        sx={{ position: "fixed", bottom: 0, left: 0, right: 0, width: "100%", paddingBottom: "env(safe-area-inset-bottom)", zIndex: 1000 }}
       >
         {tabs.map((tab) => (
-          <BottomNavigationAction
-            key={tab.value}
-            label={tab.label}
-            value={tab.value}
-            icon={tab.icon}
-            sx={{ minWidth: 60 }}
-          />
+          <BottomNavigationAction key={tab.value} label={tab.label} value={tab.value} icon={tab.icon} sx={{ minWidth: 60 }} />
         ))}
       </BottomNavigation>
     </Box>

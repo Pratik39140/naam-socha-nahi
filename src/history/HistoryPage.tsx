@@ -57,19 +57,15 @@ const HistoryPage: React.FC = () => {
       {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
         <Box>
-          <Typography variant="h6" sx={{ color: "#f1f5f9" }}>Print History</Typography>
-          <Typography sx={{ fontSize: 12, color: "#475569", fontFamily: "'JetBrains Mono', monospace" }}>
+          <Typography variant="h6" sx={{ color: "#F2F2F2" }}>Print History</Typography>
+          <Typography sx={{ fontSize: 12, color: "#B0B3B8", fontFamily: "'JetBrains Mono', monospace" }}>
             {jobs.length} collected job{jobs.length !== 1 ? "s" : ""}
           </Typography>
         </Box>
-        <Button
-          variant="outlined" size="small"
+        <Button variant="outlined" size="small"
           startIcon={<RefreshIcon sx={{ fontSize: 16 }} />}
           onClick={fetchJobs}
-          sx={{
-            borderColor: "#1e2d47", color: "#64748b", fontSize: 12,
-            "&:hover": { borderColor: "#3b82f6", color: "#3b82f6", background: "#3b82f610" },
-          }}
+          sx={{ fontSize: 12 }}
         >
           Refresh
         </Button>
@@ -78,23 +74,23 @@ const HistoryPage: React.FC = () => {
       {/* Loading */}
       {loading && (
         <Stack alignItems="center" py={6} gap={2}>
-          <CircularProgress size={32} sx={{ color: "#3b82f6" }} />
-          <Typography sx={{ fontSize: 13, color: "#475569" }}>Loading history…</Typography>
+          <CircularProgress size={32} />
+          <Typography sx={{ fontSize: 13, color: "#B0B3B8" }}>Loading history…</Typography>
         </Stack>
       )}
 
       {/* Error */}
       {!loading && error && (
-        <Box sx={{ p: 2, borderRadius: 2, background: "#ef444410", border: "1px solid #ef444430" }}>
-          <Typography sx={{ color: "#ef4444", fontSize: 14 }}>{error}</Typography>
+        <Box sx={{ p: 2, borderRadius: 2, background: "#D9302510", border: "1px solid #D9302530" }}>
+          <Typography sx={{ color: "#D93025", fontSize: 14 }}>{error}</Typography>
         </Box>
       )}
 
       {/* Empty */}
       {!loading && !error && jobs.length === 0 && (
         <Stack alignItems="center" py={8} gap={2}>
-          <HistoryIcon sx={{ fontSize: 48, color: "#1e2d47" }} />
-          <Typography sx={{ color: "#475569", fontSize: 14 }}>No print history yet</Typography>
+          <HistoryIcon sx={{ fontSize: 48, color: "#5E6266" }} />
+          <Typography sx={{ color: "#B0B3B8", fontSize: 14 }}>No print history yet</Typography>
           <Button variant="contained" size="small" onClick={() => navigate("/main/upload")}>
             Start Printing
           </Button>
@@ -105,19 +101,16 @@ const HistoryPage: React.FC = () => {
       <Stack spacing={2}>
         {!loading && jobs.map((job) => (
           <Box key={job.jobId} sx={{
-            background: "#111827",
-            border: "1px solid #1e2d47",
-            borderRadius: 3,
-            p: "18px 20px",
+            background: "#373A3C", border: "1px solid #5E6266",
+            borderRadius: 3, p: "18px 20px",
             transition: "border-color 0.2s",
-            "&:hover": { borderColor: "#334155" },
+            "&:hover": { borderColor: "#9FA3A7" },
           }}>
-            {/* Top row */}
             <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
               <Stack direction="row" alignItems="center" gap={1} sx={{ maxWidth: "70%" }}>
                 <CheckCircleOutlineIcon sx={{ fontSize: 16, color: "#22c55e", flexShrink: 0 }} />
                 <Typography sx={{
-                  fontWeight: 600, fontSize: 14, color: "#f1f5f9",
+                  fontWeight: 600, fontSize: 14, color: "#F2F2F2",
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                 }}>
                   {job.fileName}
@@ -131,7 +124,6 @@ const HistoryPage: React.FC = () => {
               </Typography>
             </Stack>
 
-            {/* Meta */}
             <Stack direction="row" gap={3} flexWrap="wrap">
               {[
                 ["Pages", job.pageRanges.length],
@@ -139,8 +131,8 @@ const HistoryPage: React.FC = () => {
                 ["Collected", formatTime(job.collectedAt)],
               ].map(([k, v]) => (
                 <Box key={String(k)}>
-                  <Typography sx={{ fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase" }}>{k}</Typography>
-                  <Typography sx={{ fontSize: 12, color: "#64748b" }}>{v}</Typography>
+                  <Typography sx={{ fontSize: 10, color: "#5E6266", fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase" }}>{k}</Typography>
+                  <Typography sx={{ fontSize: 12, color: "#9FA3A7" }}>{v}</Typography>
                 </Box>
               ))}
             </Stack>
